@@ -1,5 +1,6 @@
 import math
 import csv
+import matplotlib.pyplot as plt
 
 
 # 仅仅简单地支持二维点集
@@ -44,5 +45,17 @@ def read_csv(filename):
         new_point = Point(x, y)
         point_list.append(new_point)
     return point_list
+
+
+# 使用matplotlib库来将点绘制到笛卡尔坐标上
+def draw_point(filename):
+    point_list = read_csv(filename)
+    x = []
+    y = []
+    for point in point_list:
+        x.append(point.get_x())
+        y.append(point.get_y())
+    plt.scatter(x, y)
+    plt.show()
 
 

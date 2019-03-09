@@ -17,46 +17,56 @@ import matplotlib.pyplot as plt
 def random_centroid(num, k):
     point_set = []
     while len(point_set) < k:
-        random_num = random.randint(0, num)
-        if random_num not in point_set:
+        random_num = random.randint(0, num-1)  # 在0到num-1之间随机选择一个数
+        if random_num not in point_set:  # 如果集合里还没有这个数字就添加进去
             point_set.append(random_num)
     return point_set
 
 
-# 第一次随机生成聚类中心
+# 随机生成聚类中心
 def k_means_random(point_list, k, t):
     num = len(point_list)
-    random_list = random_centroid(num, k)
+    random_list = random_centroid(num, k)  # 随机找出k个点
     k_list = []
     for i in random_list:
         k_list.append(point_list[i])
+    print("初始点为：")
+    for each in k_list:
+        each.prn()
     return k_means(point_list, k_list, t)
 
 
-# 第一次给定聚类中心
+# 给定聚类中心
 def k_means(point_list, k_list, t):
     cluster_list = cluster(point_list, k_list)
     return k_means_recurse(point_list, cluster_list, t)
 
 
-def k_means_recurse(point_list, cluster_list, t):
-    if t == 0:
+# 下面这个函数是算法执行过程中不断迭代的部分
+# 根据上一次聚类的结果计算新的centroid
+# 然后重新划分
+def k_means_recurse(point_list, cluster_list, t):  # t为迭代次数
+    print("现在t为： " + str(t))
+    if t == 0:  # 迭代次数用尽就结束
         return cluster_list
     centroid_list = []
     for each_cluster in cluster_list:
         centroid = get_centroid(each_cluster)
         centroid_list.append(centroid)
     new_cluster_list = cluster(point_list, centroid_list)
+    if new_cluster_list == cluster_list:  # 如果聚类结果和上一次聚类的结果相同，说明已经收敛
+        print("提前收敛， t为： " + str(t))
+        return new_cluster_list
     return k_means_recurse(point_list, new_cluster_list, t-1)
 
 
-# 计算一个点集的中心
+# 计算一个点集的中心（简单地求各个维度的平均值）
 def get_centroid(point_list):
     centroid_x = 0
     centroid_y = 0
     dimension = len(point_list)
     for each_point in point_list:
-        centroid_x += each_point.get_x() / dimension
+        centroid_x += each_point.get_x() / dimension  # 算数平均
         centroid_y += each_point.get_y() / dimension
     centroid = Point(centroid_x, centroid_y)
     return centroid
@@ -74,29 +84,37 @@ def cluster(point_list, centroid_list):
         min_dis = distance_between_points(each_point, centroid_list[0])
         min_index = 0
         for i in range(1, len(centroid_list)):
-            current_dis = distance_between_points(each_point, centroid_list[i])
-            if current_dis < min_dis:
+            current_dis = distance_between_points(each_point, centroid_list[i])  # 计算该点到每一个centroid的距离
+            if current_dis < min_dis:  # 如果算出的距离小于当前记录的最小距离
                 min_dis = current_dis
                 min_index = i
-        cluster_list[min_index].append(each_point)
+        cluster_list[min_index].append(each_point)  # 把此点归入与其最近的centroid代表的类里
     return cluster_list
 
 
+# filename为文件名， k为类的数目， t为迭代次数
+def draw_cluster(filename, k, t):
+    color_set = ['r', 'y', 'b', 'k']  # matplotlib中描述点颜色的参数
+    if k > 4:
+        print("颜色不够用了！请设置小一点的k")
+    else:
+        x = []
+        y = []
+        point_list = read_csv(filename)
+        clus = k_means_random(point_list, k, t)
+        for i in range(len(clus)):  # 第i个类
+            xi = []  # Xi是第i个类里的点横坐标的集合
+            yi = []  # Yi是第i个类里的点纵坐标的集合
+            for each in clus[i]:
+                xi.append(each.get_x())
+                yi.append(each.get_y())
+            x.append(xi)
+            y.append(yi)
+        for i in range(k):
+            plt.scatter(x[i], y[i], 20, color_set[i])
+        plt.show()
+
+
 if __name__ == '__main__':
-    X = []
-    Y = []
-    point_list = read_csv("data.csv")
-    clus = k_means_random(point_list, 2, 10)
-    for i in range(len(clus)):  # 第i个类
-        Xi = []  # Xi是第i个类里的点横坐标的集合
-        Yi = []  # Yi是第i个类里的点纵坐标的集合
-        for each in clus[i]:
-            Xi.append(each.get_x())
-            Yi.append(each.get_y())
-        X.append(Xi)
-        Y.append(Yi)
-    print(X)
-    print(Y)
-    plt.scatter(X[0], Y[0], 20, 'r')
-    plt.scatter(X[1], Y[1], 20, 'y')
-    plt.show()
+    # draw_point("data.csv")
+    draw_cluster("data.csv", 3, 20)
