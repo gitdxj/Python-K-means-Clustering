@@ -10,6 +10,7 @@ K-means 算法输入为点的集合，K值和迭代次数t（类的个数），�
 
 from point import *
 import random
+import matplotlib.pyplot as plt
 
 
 # 随机生成一个centroid集合，num为点的总数
@@ -82,12 +83,20 @@ def cluster(point_list, centroid_list):
 
 
 if __name__ == '__main__':
-    # a = Point(1, 2)
-    # b = Point(2, 2)
-    # pl = []
-    # pl.append(a)
-    # pl.append(b)
-    # c = get_centroid(pl)
-    # c.prn()
-    lis = random_centroid(10, 4)
-    print(lis)
+    X = []
+    Y = []
+    point_list = read_csv("data.csv")
+    clus = k_means_random(point_list, 2, 10)
+    for i in range(len(clus)):  # 第i个类
+        Xi = []  # Xi是第i个类里的点横坐标的集合
+        Yi = []  # Yi是第i个类里的点纵坐标的集合
+        for each in clus[i]:
+            Xi.append(each.get_x())
+            Yi.append(each.get_y())
+        X.append(Xi)
+        Y.append(Yi)
+    print(X)
+    print(Y)
+    plt.scatter(X[0], Y[0], 20, 'r')
+    plt.scatter(X[1], Y[1], 20, 'y')
+    plt.show()

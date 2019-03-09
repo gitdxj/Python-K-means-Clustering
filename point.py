@@ -1,4 +1,5 @@
 import math
+import csv
 
 
 # 仅仅简单地支持二维点集
@@ -16,6 +17,9 @@ class Point:
     def get_y(self):
         return self.__m_y
 
+    def prn(self):
+        print("(" + str(self.__m_x) + ", " + str(self.__m_y), ")")
+
 
 # 计算两个点之间的欧式距离
 def distance_between_points(a, b):
@@ -30,4 +34,15 @@ def distance_between_points(a, b):
 
 # 从csv表格中读入数据
 # 其中第一列代表x轴第二列代表y轴
-def get_points(filename):
+# 返回元素为Point对象的list
+def read_csv(filename):
+    point_list = []
+    csv_file = csv.reader(open(filename))
+    for point in csv_file:
+        x = float(point[0])
+        y = float(point[1])
+        new_point = Point(x, y)
+        point_list.append(new_point)
+    return point_list
+
+
